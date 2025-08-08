@@ -16,10 +16,16 @@ console.log('PORT:', process.env.PORT);
 console.log('MONGO_URI exists:', !!process.env.MONGO_URI);
 console.log('JWT Secret exists:', !!process.env.WhatIsYourName);
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI)
-    .then(() => console.log("✅ MongoDB connected successfully"))
-    .catch((error) => console.log("❌ MongoDB connection failed:", error));
+// Connect to MongoDB with better error handling
+mongoose.connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+})
+.then(() => console.log("✅ MongoDB connected successfully"))
+.catch((error) => {
+    console.log("❌ MongoDB connection failed:", error);
+    // Don't exit the process, let it continue
+});
 
 // Middleware
 app.use(bodyParser.json());
@@ -111,8 +117,8 @@ app.use('*', (req, res) => {
     });
 });
 
-// Start server
-app.listen(PORT, () => {
+// Start server with error handling
+const server = app.listen(PORT, () => {
     console.log(`🚀 Server started and running at ${PORT}`);
     console.log('📋 Available routes:');
     console.log('   - GET /test');
@@ -121,4 +127,20 @@ app.listen(PORT, () => {
     console.log('   - GET /');
     console.log('   - GET /vendor/all-vendors');
     console.log('=== SERVER READY ===');
+});
+
+// Handle server errors
+server.on('error', (error) => {
+    console.error('❌ Server error:', error);
+    if (error.code === 'EADDRINUSE') {
+        console.log('Port is already in use. Trying to use a different port...');
+    }
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+    console.log('SIGTERM received, shutting down gracefully');
+    server.close(() => {
+        console.log('Process terminated');
+    });
 });
