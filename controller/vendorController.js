@@ -58,12 +58,14 @@ try{
 }
 
 const getAllVendors=async(req,res)=>{
+    console.log("getAllVendors function called");
     try{
-        const vendors=await Vendor.find().populaate('firm');
+        const vendors=await Vendor.find().populate('firm');
+        console.log("Vendors found:", vendors.length);
         res.json({vendors})
 
     }catch(error){
-        console.log(error);
+        console.log("Error in getAllVendors:", error);
         res.status(500).json({error:"Internal server error"});
     }
 }
