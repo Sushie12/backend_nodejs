@@ -60,7 +60,7 @@ try{
 const getAllVendors=async(req,res)=>{
     console.log("getAllVendors function called");
     try{
-        const vendors=await Vendor.find().populate('firm');
+        const vendors=await Vendor.find();
         console.log("Vendors found:", vendors.length);
         res.json({vendors})
 
@@ -75,7 +75,7 @@ const getVendorById=async(req,res)=>{
     const vendorId=req.params.id;
 
     try{
-        const vendor=await Vendor.findById(vendorId).populate('firm');
+        const vendor=await Vendor.findById(vendorId);
         if(!vendor){
             return res.status(404).json({error:"Vendor not found "});
 
